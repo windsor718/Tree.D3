@@ -1,0 +1,28 @@
+{
+	"name": "Meiji",
+	"kind": [
+	{
+		"name": "series of chocolate",
+		"kind": [
+		{
+			"name": "kinokonoyama",
+			"kind": [
+				{"name":"aziwaimint"},
+				{"name":"kokutoukinako"},
+				{"name": "chocobanana"}
+			]
+		},
+		{
+			"name": "takenokonosato",
+			"kind" : [
+				{"name":"macadamiacookie"},
+				{"name":"yakiguri"}
+			]
+		},
+		{
+			"name":"meltykiss"
+		}
+		]
+	}
+	]
+}
