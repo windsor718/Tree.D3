@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 軸の属性を決めている。特にfill:none;にしないと真っ黒になる。-->
+    <style>
+        .axis text {
+          font-size: 15px;
+          font-family: 'arial-black';
+        }
+ 
+        .axis path {
+        /*
+        fillとopacityで半透明な背景色。
+        */
+          fill: White;
+          opacity: 0.1;
+          stroke: #000;
+          stroke-width: 1;
+          shape-rendering: crispEdges;
+        }
+ 
+        .axis line {
+          stroke: #000;
+          stroke-width: 1;
+          shape-rendering: crispEdges;
+        }
+ 
+        .line {
+          fill: none;
+          stroke: DarkGreen;
+          stroke-width: 10px;
+        }
+        .tick line{
+          opacity: 0.2;
+        }
+    </style>
+</head>
+<body>    
+ 
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+ 
+    <script>
+//general setting
+var startYear = 1980
+var endYear = 2016
+
+ //background definition
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 1500 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+ 
+var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+ 
+var xScale = d3.time.scale()
+                .domain([
+                  new Date(startYear,0,1),
+                  new Date(endYear,0,1)
+                  ])
+                .range([0,width])
+ 
+var yScale = d3.scale.linear()
+                .domain([0,100])
+                .range([550,0]);
+ 
+var colorCategoryScale = d3.scale.category10();
+ 
+var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(d3.time.year, 5)
+                .tickFormat("")
+                .innerTickSize(-height)
+                .outerTickSize(0)
+                .tickPadding(10);
+
+
+ var xAxis2 = d3.svg.axis()
+                .scale(xScale)
+                .orient("top")
+                .ticks(d3.time.year, 5)
+                .tickFormat("")
+                .innerTickSize(-height)
+                .outerTickSize(0)
+                .tickPadding(10);
+
+ var xAxis3 = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(d3.time.year, 1)
+                .tickFormat(d3.time.format('%Y'))
+                .tickPadding(10);
+
+
+var yAxis = d3.svg.axis()
+                .ticks(5)
+                .scale(yScale)
+                .orient("left")
+                .innerTickSize(0)
+                .outerTickSize(0)
+                .tickFormat("");
+
+//
+var dataYears = function(dataStartYear,residual,dataheight) {
+
+  dataStart = new Date(dataStartYear,0,1);
+  end = new Date(endYear,0,1);
+  var paper=[
+    {"YEAR": dataStart, "vPosition": dataheight},
+    {"YEAR": end, "vPosition": dataheight}
+    ];
+
+  var line=d3.svg.line()
+        .x(function(d) { return xScale(d["YEAR"]); })
+        .y(function(d) { return yScale(d["vPosition"]); })
+        .interpolate("linear");
+  svg.append("path")
+        .datum(paper)
+        .attr("class","line")
+        .attr("d",line);
+  return [paper, line];
+};
+
+dataYears(1980,0,70)
+ 
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+ 
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(xAxis);        
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(xAxis2); 
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(xAxis3);             
+    </script>
+ 
+</body>
+</html>
