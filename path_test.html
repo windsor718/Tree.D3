@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 軸の属性を決めている。特にfill:none;にしないと真っ黒になる。-->
+    <style>
+        .axis text {
+          font-size: 15px;
+          font-family: 'arial-black';
+        }
+ 
+        .axis path {
+        /*
+        fillとopacityで半透明な背景色。
+        */
+          fill: White;
+          opacity: 0.1;
+          stroke: #000;
+          stroke-width: 1;
+          shape-rendering: crispEdges;
+        }
+ 
+        .axis line {
+          stroke: #000;
+          stroke-width: 1;
+          shape-rendering: crispEdges;
+        }
+ 
+        .line {
+          fill: none;
+          stroke: DarkGreen;
+          stroke-width: 5px;
+        }
+        .tick line{
+          opacity: 0.2;
+        }
+    </style>
+</head>
+<body>    
+ 
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+ 
+    <script>
+//general setting
+var startYear = 1980
+var endYear = 2016
+var slope = 2
+
+ //background definition
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 1500 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+ 
+var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+ 
+var xScale = d3.time.scale()
+                .domain([
+                  new Date(startYear,0,1),
+                  new Date(endYear,0,1)
+                  ])
+                .range([0,width])
+ 
+var yScale = d3.scale.linear()
+                .domain([0,110])
+                .range([550,0]);
+ 
+var colorCategoryScale = d3.scale.category10();
+ 
+var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(d3.time.year, 5)
+                .tickFormat("")
+                .innerTickSize(-height)
+                .outerTickSize(0)
+                .tickPadding(10);
+
+
+ var xAxis2 = d3.svg.axis()
+                .scale(xScale)
+                .orient("top")
+                .ticks(d3.time.year, 5)
+                .tickFormat("")
+                .innerTickSize(-height)
+                .outerTickSize(0)
+                .tickPadding(10);
+
+ var xAxis3 = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(d3.time.year, 1)
+                .tickFormat(d3.time.format('%Y'))
+                .tickPadding(10);
+
+
+var yAxis = d3.svg.axis()
+                .ticks(5)
+                .scale(yScale)
+                .orient("left")
+                .innerTickSize(0)
+                .outerTickSize(0)
+                .tickFormat("");
+
+//
+var dataYears = function(i, endYear) {
+  d3.json("paper.json",function(data){
+  var  dataStartYear = Number(data[i].YEAR);
+  var  dataheight=Number(data[i].vPosition);
+  var  childs=data[i].children;
+  var  dataStart = new Date(dataStartYear,0,1);
+  var  end = new Date(endYear,0,1);
+  var  paper=[
+    {"YEAR": dataStart, "vPos": dataheight},
+    {"YEAR": end, "vPos": dataheight}
+    ];
+  console.log(data[i].children[0]);
+  var xPos=xScale(dataStart);
+  //console.log(xPos);
+  var yPos=yScale(dataheight);
+  //console.log(yPos);
+  var line=d3.svg.line()
+        .x(function(d) { return xScale(d["YEAR"]); })
+        .y(function(d) { return yScale(d["vPos"]); })
+        .interpolate("linear");
+  svg.append("path")
+        .datum(paper)
+        .attr("class","line")
+        .attr("d",line);
+  svg.append("circle")
+          .attr("r", 5)
+          .attr("cx", Number(xPos))
+          .attr("cy", Number(yPos))
+          .attr("fill", "White")
+          .attr("stroke-width",1.5)
+          .attr("stroke", "DarkGreen");
+  svg.append("text")
+          .attr("x", Number(xPos)+20)
+          .attr("y", Number(yPos)+20)
+          .attr("font-family","Impact,sans-serif")
+          .attr("font-size", "20px")
+          .text(data[i].name);
+  svg.append("text")
+          .attr("x", Number(xPos)+20)
+          .attr("y", Number(yPos)+40)
+          .attr("font-style", "italic")
+          .text(data[i].author);
+
+  if (childs != "none"){
+  var child_Year = childs[0].YEAR;
+  var child_Year_Lag = Number(child_Year)+Number(slope)
+  console.log(child_Year_Lag)
+  var child_height = childs[0].vPosition;
+  var child_Start = new Date(child_Year, 0, 1);
+  var child_Start_Lag = new Date(child_Year_Lag, 0, 1);
+
+  var pipe=[
+  {"hrzntl":child_Start, "vrtcl":dataheight},
+  {"hrzntl":child_Start_Lag, "vrtcl":child_height}
+  ];
+
+  var child_paper = [
+  {"YEAR": child_Start_Lag, "vPos": child_height},
+  {"YEAR": end, "vPos": child_height}
+  ];
+
+  var child_xPos=xScale(child_Start);
+  var child_xPos_Lag=xScale(child_Start_Lag);
+  var child_yPos=yScale(child_height);
+
+  var line=d3.svg.line()
+        .x(function(d) { return xScale(d["YEAR"]); })
+        .y(function(d) { return yScale(d["vPos"]); })
+        .interpolate("linear");
+  var pipeLine=d3.svg.line()
+        .x(function(d){return xScale(d["hrzntl"]); })
+        .y(function(d){return yScale(d["vrtcl"]); })
+        .interpolate("linear");
+  svg.append("path")
+        .datum(child_paper)
+        .attr("class","line")
+        .attr("d",line);
+  svg.append("path")
+        .datum(pipe)
+        .attr("class","line")
+        .attr("d", pipeLine);
+  svg.append("circle")
+          .attr("r", 5)
+          .attr("cx", Number(child_xPos))
+          .attr("cy", Number(yPos))
+          .attr("fill", "White")
+          .attr("stroke-width",1.5)
+          .attr("stroke", "DarkGreen");
+  svg.append("circle")
+          .attr("r", 2.5)
+          .attr("cx", Number(child_xPos_Lag))
+          .attr("cy", Number(child_yPos))
+          .attr("fill", "DarkGreen");
+  svg.append("text")
+          .attr("x", Number(child_xPos_Lag)+20)
+          .attr("y", Number(child_yPos)+20)
+          .attr("font-family","Impact,sans-serif")
+          .attr("font-size", "20px")
+          .text(childs[0].name);
+  svg.append("text")
+          .attr("x", Number(child_xPos_Lag)+20)
+          .attr("y", Number(child_yPos)+40)
+          .attr("font-style", "italic")
+          .text(childs[0].author);
+  }
+  });
+};
+
+var data_json = d3.json("paper.json", function(d){
+  length = d[0].parent1;
+  for (i=1;i<=length+1;i++){
+    dataYears(i,endYear);
+  };
+});
+
+
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+ 
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(xAxis);        
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(xAxis2); 
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(xAxis3);             
+    </script>
+ 
+</body>
+</html>
