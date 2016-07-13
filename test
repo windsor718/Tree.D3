@@ -1,0 +1,63 @@
+<script type="text/javascript", src="http://d3js.org/d3.v3.min.js"></script>
+<svg id="svgRect"></svg>
+<button id="transitionBtn">transition()</button>
+<script type="text/javascript">
+    var dataset = [ 5, 10, 15, 20, 25 ];
+    var width = 50;
+    var height = 150;
+    
+    var svg = d3.select("#svgRect").attr("height", 200).attr("width", 800);
+    svg.append("text")
+           .attr("id","tech")
+           .attr("x",100)
+           .attr("y",100)
+           .text("yeah...!!")
+           .style("opacity",0)
+    svg.selectAll("rect")
+    .data(dataset)
+    .enter()
+    .append("rect")
+    .attr("width", width)
+    .attr("height", function(d) { return 0 })
+    .attr("x", function(d, i) { return i*(width+5)+5 })
+    .attr("y", function(d) { return height })
+    .attr("fill", "yellow")
+    .attr("stroke", "orange")
+    .attr("stroke-width", "3")
+    .on("mouseover", function() { d3.select(this)
+              .attr("fill", "rgb(39, 250, 102)")
+              .attr("stroke", "green")
+    })
+    .on("mouseout", function(d) { 
+          d3.select(this)
+          .attr("fill", "yellow")
+          .attr("stroke", "orange")
+    })
+    
+    .on("click",function(){
+        var active = tech.active ? false:true,
+        newOpacity = active ? 0 : 1;
+        d3.select("#tech").style("opacity", newOpacity);
+        tech.active = active;
+    });
+    
+     svg.selectAll("rect")
+    .data(dataset)
+    .transition().delay(1500).duration(2000)
+    .attr("y", function(d) { return height-d*5 })
+    .attr("height", function(d) { return d*5 })
+
+
+    d3.select("#transitionBtn").on("click", function() {
+         svg.selectAll("rect")
+        .data(dataset)        
+        .attr("height", function(d) { return 0 })
+        .attr("y", function(d) { return height })
+
+         svg.selectAll("rect")
+        .data(dataset)
+        .transition().delay(0).duration(2000)
+        .attr("y", function(d) { return height-d*5 })
+        .attr("height", function(d) { return d*5 })
+    });
+</script>
