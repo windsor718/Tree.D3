@@ -1,4 +1,4 @@
-#README.txt
+#README
 
 Tree diagram : 2016/06/15
 import time scale
